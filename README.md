@@ -1,64 +1,32 @@
-# Hello Coders
+<h1 align="center">Hi <img src="https://raw.githubusercontent.com/nixin72/nixin72/master/wave.gif" 
+         alt="Waving hand animated gif"
+         height="45"
+         width="45" />, I'm Yash Patel</h1>
+<h5 align="center">
+I’m a 3rd-year student pursuing a Bachelors’s in Computer science studies with a specialization of AIML, from UPES  Dehradun. I am a Big data and analytics enthusiast, data science and web developer
+</h5>
 
-### <div align="center">I'm Yash Patel, a full-time full-stack freelance developer 👨‍💻 I am student 🚀</div>  
+- 🌱 I’m currently learning React-js
   
+- ❓ Ask me about anything related to DJANGO and PYTHON and related technologies
 
-  
-  
+- ⚡ Fun fact: I use tabs over spaces
 
-- 🌱 I’m currently learning React-js  
-  
-
-- ❓ Ask me about anything related to DJANGO and PYTHON and related technologies  
-  
-
-- ⚡ Fun fact: I use tabs over spaces  
-  
-
-<br/>  
-
-
-## My Skill Set  
-
-
-### Web development  
-<div>  
-<img style="margin: 30px" src="https://profilinator.rishav.dev/skills-assets/javascript-original.svg" alt="JavaScript" height="25" />  
-<img style="margin: 30px" src="https://profilinator.rishav.dev/skills-assets/html5-original-wordmark.svg" alt="HTML5" height="25" />  
-<img style="margin: 30px" src="https://profilinator.rishav.dev/skills-assets/css3-original-wordmark.svg" alt="CSS3" height="25" />  
-<img style="margin: 30px" src="https://profilinator.rishav.dev/skills-assets/bootstrap-plain.svg" alt="Bootstrap" height="25" />  
-<img style="margin: 30px" src="https://profilinator.rishav.dev/skills-assets/django-original.svg" alt="Django" height="25" />  
-<img style="margin: 30px" src="https://profilinator.rishav.dev/skills-assets/python-original.svg" alt="Python" height="25" />  
-<img style="margin: 30px" src="https://profilinator.rishav.dev/skills-assets/logo-title.svg" alt="Chart.js" height="25" />  
-<img style="margin: 30px" src="https://profilinator.rishav.dev/skills-assets/postgresql-original-wordmark.svg" alt="PostgreSQL" height="25" />  
-<img style="margin: 30px" src="https://profilinator.rishav.dev/skills-assets/mongodb-original-wordmark.svg" alt="MongoDB" height="25" />  
-<img style="margin: 30px" src="https://profilinator.rishav.dev/skills-assets/mysql-original-wordmark.svg" alt="MySQL" height="25" />  
-<img style="margin: 30px" src="https://profilinator.rishav.dev/skills-assets/figma-icon.svg" alt="Figma" height="25" />  
-<img style="margin: 30px" src="https://profilinator.rishav.dev/skills-assets/react-original-wordmark.svg" alt="React" height="25" />  
-<img style="margin: 30px" src="https://profilinator.rishav.dev/skills-assets/graphql.png" alt="GraphQL" height="25" />  
-</div>  
-
-
-
-### Programming Language  
-<div>  
-<img style="margin: 10px" src="https://profilinator.rishav.dev/skills-assets/python-original.svg" alt="Python" height="25" />  
-<img style="margin: 10px" src="https://profilinator.rishav.dev/skills-assets/java-original-wordmark.svg" alt="Java" height="25" />  
-<img style="margin: 10px" src="https://profilinator.rishav.dev/skills-assets/cplusplus-original.svg" alt="C++" height="25" />  
-<img style="margin: 10px" src="https://profilinator.rishav.dev/skills-assets/c-original.svg" alt="C" height="25" />  
-<img style="margin: 10px" src="https://profilinator.rishav.dev/skills-assets/r.svg" alt="R" height="25" />  
-</div>  
-
-
-
-### Tools  
 <div>
-<img style="margin: 10px" src="https://profilinator.rishav.dev/skills-assets/git-scm-icon.svg" alt="Git" height="50" />  
-</div>  
+<p align="center"> <img src="https://komarev.com/ghpvc/?username=yash-2115&label=Profile%20views&color=0e75b6&style=flat" alt="yash" />
+ </div> 
 
-<br/>  
+<a align= "center" href="https://github.com/yash-2115">
+<img alt= "stats card" height="200px" width="400" src="https://github-readme-streak-stats.herokuapp.com/?user=yash-2115&theme=radical">
+<img align="right" height="350" width="400" src="https://cdn.dribbble.com/users/2238041/screenshots/4763918/working.gif" /> </a>
+</p>
+<img height="200px" width="400" src="https://github-readme-stats.vercel.app/api?username=yash-2115&count_private=true&theme=radical&show_icons=true" />
 
+<p align="left"> <a href="https://twitter.com/YashPatel210420" target="blank"><img src="https://img.shields.io/twitter/follow/YashPatel210420?logo=twitter&style=for-the-badge" alt="YashPatel210420" /></a> </p>
 
+- 📫 How to reach me **mailforyash04@gmail.com**
+<br><br>
+ 
 ## Connect with me  
 <div align="center">
 <a href="https://github.com/yash-2115" target="_blank">
@@ -85,9 +53,5 @@
 </div>  
   
 
-<br/>  
-
-
-## Github Stats  
-<div align="center"><img src="https://github-readme-stats.vercel.app/api?username=yash-2115&show_icons=true&count_private=true&hide_border=true" align="center" style="width: 100%" /></div> 
+<br/>
 
