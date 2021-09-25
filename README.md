@@ -22,7 +22,7 @@ I’m a 3rd-year student pursuing a Bachelors’s in Computer science studies wi
 </p>
 <img height="200px" width="400" src="https://github-readme-stats.vercel.app/api?username=yash-2115&count_private=true&theme=radical&show_icons=true" />
 
-<p align="left"> <a href="https://twitter.com/yashpatel_py" target="blank"><img src="https://img.shields.io/twitter/follow/YashPatel210420?logo=twitter&style=for-the-badge" alt="YashPatel210420" /></a> </p>
+<p align="left"> <a href="https://twitter.com/yashpatel_py" target="blank"><img src="https://img.shields.io/twitter/follow/yashpatel_py?logo=twitter&style=for-the-badge" alt="yashpatel_py" /></a> </p>
 
 - 📫 How to reach me **mailforyash04@gmail.com**
 <br><br>
