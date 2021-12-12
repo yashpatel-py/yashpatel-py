@@ -1,4 +1,4 @@
-# Hi, I am Pranay! Great to see you here! <img src="https://raw.githubusercontent.com/thepranaygupta/thepranaygupta/main/src/wave.gif" width="30px">
+# Hi, I am Yash Patel! Great to see you here! <img src="https://raw.githubusercontent.com/thepranaygupta/thepranaygupta/main/src/wave.gif" width="30px">
 
 <div>
 <p align="center"> <img src="https://komarev.com/ghpvc/?username=yash-2115&label=Profile%20views&color=0e75b6&style=flat" alt="yash" />
