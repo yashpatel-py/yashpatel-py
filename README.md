@@ -69,9 +69,6 @@ I am Yash Patel, currently pursuing my B.Tech degree in **Computer science and e
 </td>
 </tr>
 </table>
-<p align="center">
-<img align="center" src="https://github-readme-streak-stats.herokuapp.com/?user=yash-2115&theme=tokyonight" />
-</p>
 
 <!-- Sauce: https://github.com/alexandresanlim/Badges4-README.md-Profile -->
 
