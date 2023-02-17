@@ -11,7 +11,7 @@ I am Yash Patel, currently pursuing my B.Tech degree in **Computer science and e
 [![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=flat-square&logo=twitter&logoColor=white)](https://twitter.com/yashpatel_py)
 [![Instagram Badge](https://img.shields.io/badge/-Instagram-purple?style=flat-square&logo=instagram&logoColor=white&link=https://instagram.com/yashpatel.py/)](https://instagram.com/yashpatel.py)
 
-[![Yash's GitHub activity graph](https://activity-graph.herokuapp.com/graph?username=yashpatel-py&theme=xcode)](https://github.com/yash-2115)
+[![Yash's GitHub activity graph](https://github-readme-activity-graph.cyclic.app/graph?username=yashpatel-py&theme=react-dark)](https://github.com/ashutosh00710/github-readme-activity-graph)
 
 <!-- ## 👨🏻‍💻 Coding Profiles
 
