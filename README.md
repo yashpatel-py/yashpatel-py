@@ -4,7 +4,7 @@
 <p align="center"> <img src="https://komarev.com/ghpvc/?username=yash-2115&label=Profile%20views&color=0e75b6&style=flat" alt="yash" />
 </div> 
 
-I am Yash Patel, currently pursuing my B.Tech degree in **Computer science and engineering** from Ganpat university. I am a tech enthusiast & an open-source advocate. I am always open to collaborating on projects. Find out more about me & feel free to connect with me here:
+I am Yash Patel and I have completed my B.Tech-Computer Science and Engineering with Specialization of Big Data And Analytics(with IBM). According to me, there is nothing greater than finding opportunities for smart people to do awesome things, it's a fantastic process that I feel lucky to participate in.
 
 [![Email Badge](https://img.shields.io/badge/-Email-c14438?style=flat-square&logo=Gmail&logoColor=white&link=mailto:pranaygupta.aec@gmail.com)](mailto:mailforyash04@gmail.com)
 [![Linkedin Badge](https://img.shields.io/badge/-LinkedIn-blue?style=flat-square&logo=Linkedin&logoColor=white&link=https://www.linkedin.com/in/yashpatel2104/)](https://www.linkedin.com/in/yashpatel2104/)
