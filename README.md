@@ -64,8 +64,8 @@ I am Yash Patel, currently pursuing my B.Tech degree in **Computer science and e
 <table>
 <tr>
 <td>
-<img src="https://github-readme-stats.vercel.app/api?username=yash-2115&include_all_commits=true&count_private=true&show_icons=true&line_height=20&theme=tokyonight"/>
-<td><img src="https://github-readme-stats.vercel.app/api/top-langs?username=yash-2115&show_icons=true&locale=en&layout=compact&theme=tokyonight" />
+<img src="https://github-readme-stats.vercel.app/api?username=yashpatel-py&include_all_commits=true&count_private=true&show_icons=true&line_height=20&theme=tokyonight"/>
+<td><img src="https://github-readme-stats.vercel.app/api/top-langs?username=yashpatel-py&show_icons=true&locale=en&layout=compact&theme=tokyonight" />
 </td>
 </tr>
 </table>
