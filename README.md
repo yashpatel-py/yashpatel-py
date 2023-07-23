@@ -1,7 +1,7 @@
 # Hi, I am Yash Patel! Great to see you here! <img src="https://raw.githubusercontent.com/thepranaygupta/thepranaygupta/main/src/wave.gif" width="30px">
 
 <div>
-<p align="center"> <img src="https://komarev.com/ghpvc/?username=yash-2115&label=Profile%20views&color=0e75b6&style=flat" alt="yash" />
+<p align="center"> <img src="https://komarev.com/ghpvc/?username=yashpatel-py&label=Profile%20views&color=0e75b6&style=flat" alt="yash" />
 </div> 
 
 I am Yash Patel and I have completed my B.Tech-Computer Science and Engineering with Specialization of Big Data And Analytics(with IBM). According to me, there is nothing greater than finding opportunities for smart people to do awesome things, it's a fantastic process that I feel lucky to participate in.
