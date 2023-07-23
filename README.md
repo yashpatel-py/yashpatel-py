@@ -1,7 +1,7 @@
 # Hi, I am Yash Patel! Great to see you here! <img src="https://raw.githubusercontent.com/thepranaygupta/thepranaygupta/main/src/wave.gif" width="30px">
 
 <div>
-<p align="center"> <img src="[![Ashutosh's github activity graph](https://github-readme-activity-graph.vercel.app/graph?username=yashpatel-py&bg_color=000000&color=ffffff&line=51c85f&point=303030&area=true&hide_border=true)](https://github.com/ashutosh00710/github-readme-activity-graph)" alt="yash" />
+<p align="center"> <img src="https://komarev.com/ghpvc/?username=yash-2115&label=Profile%20views&color=0e75b6&style=flat" alt="yash" />
 </div> 
 
 I am Yash Patel and I have completed my B.Tech-Computer Science and Engineering with Specialization of Big Data And Analytics(with IBM). According to me, there is nothing greater than finding opportunities for smart people to do awesome things, it's a fantastic process that I feel lucky to participate in.
@@ -11,7 +11,7 @@ I am Yash Patel and I have completed my B.Tech-Computer Science and Engineering 
 [![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=flat-square&logo=twitter&logoColor=white)](https://twitter.com/yashpatel_py)
 [![Instagram Badge](https://img.shields.io/badge/-Instagram-purple?style=flat-square&logo=instagram&logoColor=white&link=https://instagram.com/yashpatel.py/)](https://instagram.com/yashpatel.py)
 
-[![Yash's GitHub activity graph](https://github-readme-activity-graph.cyclic.app/graph?username=yashpatel-py&theme=react-dark)](https://github.com/ashutosh00710/github-readme-activity-graph)
+[![Yash's GitHub activity graph](https://github-readme-activity-graph.vercel.app/graph?username=yashpatel-py&bg_color=000000&color=ffffff&line=51c85f&point=303030&area=true&hide_border=true)](https://github.com/ashutosh00710/github-readme-activity-graph)
 
 <!-- ## 👨🏻‍💻 Coding Profiles
 
