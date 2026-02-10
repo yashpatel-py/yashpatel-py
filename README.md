@@ -84,10 +84,6 @@ me.say_hi()
   <img src="https://github-readme-streak-stats.herokuapp.com/?user=yashpatel-py&theme=radical&hide_border=true" alt="GitHub Streak" height="170"/>
 </div>
 
-<div align="center">
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=yashpatel-py&layout=compact&theme=radical&hide_border=true&langs_count=8" alt="Top Languages" />
-</div>
-
 ---
 
 ## 📈 Contribution Graph
