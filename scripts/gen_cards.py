@@ -4,8 +4,12 @@ gen_cards.py — self-hosted replacement for github-readme-stats.
 
 Renders four SVG cards into assets/:
 
-    assets/stats-dark.svg    assets/stats-light.svg     (460 x 200)
-    assets/langs-dark.svg    assets/langs-light.svg     (460 x 200)
+    assets/stats-dark.svg     (460 x 200)
+    assets/langs-dark.svg     (460 x 200)
+
+Dark only: the cards sit under assets/hero.svg, a single opaque dark panel with
+no light variant. Each panel paints its own background, so one file per graphic
+renders identically in both GitHub themes and a mismatch is impossible.
 
 Design contract
 ---------------
@@ -18,7 +22,7 @@ Design contract
 * --offline renders from the verified fact-sheet numbers so the assets exist and
   look right before the first Actions run.
 * Every SVG paints its own opaque background, so a card never inherits the page
-  colour. Dark/light are separate files referenced by <picture>.
+  colour.
 * All styling is presentation attributes (no CSS classes, no <style>), no
   <foreignObject>, no external fonts, no external images — everything survives
   GitHub's SVG sanitiser and the camo image proxy.
@@ -66,7 +70,7 @@ contributions — factually wrong, and it would have overwritten the good card.
 
 sanity_gate() now carries plausibility FLOORS as well as zero checks. They
 encode "this account cannot have collapsed to these numbers overnight":
-contributions_private >= 1, followers >= 10, stars >= 10, lang_repo_count >= 5.
+contributions_private >= 1, followers >= 10, stars >= 10, lang_repo_count >= 30.
 A default-GITHUB_TOKEN response trips `contributions_private is 0 (floor 1)`
 and, on an account with few public repos, the repo floor too — so it now FAILS
 and writes nothing instead of rendering a degraded card. Verified by simulating
@@ -528,7 +532,7 @@ def fetch(token: str) -> dict:
     total_contrib = private_contrib = 0
     stars = forks = 0
     name = DISPLAY_NAME
-    lang_bytes: dict[str, float] = {}
+    lang_repos: dict[str, int] = {}
     nonfork_repos = 0
     pages = 0
 
@@ -555,11 +559,19 @@ def fetch(token: str) -> dict:
             if not node.get("isPrivate"):
                 stars += int(node.get("stargazerCount") or 0)
                 forks += int(node.get("forkCount") or 0)
-            for edge in (node.get("languages") or {}).get("edges") or []:
-                lname = (edge.get("node") or {}).get("name")
-                if not lname:
-                    continue
-                lang_bytes[lname] = lang_bytes.get(lname, 0.0) + float(edge.get("size") or 0)
+            # Count each repo once, under its PRIMARY language, rather than
+            # summing bytes. Byte totals are dominated by artifacts rather than
+            # effort: a single Jupyter repo here carries 4.4 MB because notebooks
+            # embed base64 image output, which rendered a card reading
+            # "Jupyter 75.9% / Python 9.1%" for an engineer whose work is almost
+            # entirely Python. Repo counts are stable, representative, and match
+            # what the offline fallback reports, so both paths agree.
+            edges = (node.get("languages") or {}).get("edges") or []
+            if not edges:
+                continue
+            primary = (edges[0].get("node") or {}).get("name")
+            if primary:
+                lang_repos[primary] = lang_repos.get(primary, 0) + 1
 
         page_info = user["repositories"]["pageInfo"]
         pages += 1
@@ -579,9 +591,9 @@ def fetch(token: str) -> dict:
         "public_repos": public_repos,
         "stars": stars,
         "forks": forks,
-        "lang_basis": "BYTES OF CODE",
+        "lang_basis": "PRIMARY LANGUAGE",
         "lang_repo_count": nonfork_repos,
-        "languages": sorted(lang_bytes.items(), key=lambda kv: kv[1], reverse=True),
+        "languages": sorted(lang_repos.items(), key=lambda kv: kv[1], reverse=True),
     }
     sanity_gate(result)
     return result
@@ -596,10 +608,14 @@ def fetch(token: str) -> dict:
 # 1,604 private contributions, 52 followers, 48 stars, 46 non-fork repos — every
 # floor sits an order of magnitude below reality, so normal drift never trips it.
 FLOORS = {
+    # 46 non-fork repos exist, only 21 of them public. A run that sees ~21 is a
+    # token that cannot read private repos, which silently skews the language
+    # mix towards whatever happens to be public. Fail closed: the committed
+    # cards stay as the last known-good version until PROFILE_TOKEN is present.
+    "lang_repo_count": 30,
     "contributions_private": 1,
     "followers": 10,
     "stars": 10,
-    "lang_repo_count": 5,
 }
 
 
