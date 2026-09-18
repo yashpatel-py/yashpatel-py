@@ -1,9 +1,19 @@
 name: Generate Snake Animation
 
 on:
-  # Run automatically every 24 hours
+  # Once a day at 03:47 UTC.
+  #
+  # NOT "0 */24 * * *". A cron step value is evaluated over its own field range, so
+  # */24 on the 0-23 hour field yields exactly one match, hour 0 - i.e. "daily at
+  # midnight UTC", not "every 24 hours". Midnight UTC on the minute is the single most
+  # contended slot on GitHub's shared scheduler, where runs are routinely delayed by
+  # tens of minutes or dropped outright. An explicit off-peak hour with a non-zero
+  # minute is scheduled far more reliably.
+  #
+  # 03:47 also stays clear of profile-assets.yml's 06:23 / 18:23 slots, so the two
+  # workflows never queue against each other.
   schedule:
-    - cron: "0 */24 * * *"
+    - cron: "47 3 * * *"
 
   # Allow manual trigger
   workflow_dispatch:
@@ -12,9 +22,25 @@ on:
   push:
     branches:
       - main
+    # The profile-assets workflow commits assets/ back to main. Those commits carry
+    # [skip ci] and so never reach here, but ignoring the paths as well means a manual
+    # asset edit cannot trigger a pointless snake rebuild either.
+    paths-ignore:
+      - "assets/**"
+      - "README.md"
 
+# Needed by the deploy step below, which pushes the rendered SVGs to the `output` branch.
 permissions:
   contents: write
+
+# Distinct from profile-assets.yml's "profile-assets" group, so the two workflows never
+# block one another. They also cannot collide on content: this one writes ONLY the
+# `output` branch (via build_dir: dist -> target_branch: output) and never touches main,
+# while profile-assets writes only assets/ on the default branch and never touches
+# `output`. Nothing is shared but the repository itself.
+concurrency:
+  group: snake-animation
+  cancel-in-progress: false
 
 jobs:
   generate:
@@ -24,22 +50,30 @@ jobs:
     steps:
       # Checkout the repository
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # Generate the snake animation
+      # Generate the snake animation.
+      # github_token is a real INPUT of this action (it defaults to ${{ github.token }}).
+      # It reads no GITHUB_TOKEN environment variable, so the `env:` block that used to
+      # sit here was a no-op; passing it as the input is what actually has an effect.
       - name: Generate github-contribution-grid-snake.svg
         uses: Platane/snk/svg-only@v3
         with:
           github_user_name: yashpatel-py
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           outputs: |
             dist/github-contribution-grid-snake.svg
             dist/github-contribution-grid-snake-dark.svg?palette=github-dark
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Push the generated files to output branch
+      # Push the generated files to the output branch.
+      # v3.1.0 was a Node 16 action; Node 16 is end-of-life on GitHub runners and is
+      # being force-migrated. v4 is the same action on Node 20 with identical inputs.
+      # target_branch and build_dir are deliberately unchanged - the `output` branch
+      # already serves working snake SVGs that README.md links to via
+      # raw.githubusercontent.com, and renaming either would break them.
+      # This env: GITHUB_TOKEN is NOT a no-op - this action authenticates with it.
       - name: Push github-contribution-grid-snake.svg to output branch
-        uses: crazy-max/ghaction-github-pages@v3.1.0
+        uses: crazy-max/ghaction-github-pages@v4
         with:
           target_branch: output
           build_dir: dist

@@ -1,0 +1,333 @@
+# Regenerates the self-hosted README cards and commits them back to the default branch.
+#
+# Why this exists: every third-party README image service this repo used to depend on is
+# now dead or dying (github-readme-stats -> 503, trophy -> 402, activity-graph -> 402).
+# The git log records three separate "Remove ... image from README" commits. So the cards
+# are generated here, committed here, and served from here. Nothing on the profile page
+# is fetched from a generator we do not control.
+#
+# ---------------------------------------------------------------------------------------
+# THE ASSET CONTRACT
+# ---------------------------------------------------------------------------------------
+# This workflow produces exactly three files, and README.md embeds exactly these three paths:
+#
+#     assets/hero.svg
+#     assets/stats-dark.svg
+#     assets/langs-dark.svg
+#
+# Dark only, deliberately. Every panel paints its own opaque background, so a single file
+# per graphic renders identically on light- and dark-theme GitHub and a theme mismatch is
+# structurally impossible. There are no -light.svg variants to keep in sync.
+#
+# The list is duplicated once more, in the REQUIRED array of the verify step's validator.
+# If you add, rename or drop a card you must change it in BOTH places AND in README.md;
+# a path that only exists in two of the three is how the profile ends up with a broken
+# image icon that nobody notices for a month.
+#
+# ---------------------------------------------------------------------------------------
+# THE CORRECTNESS GUARANTEE (read before changing anything below)
+# ---------------------------------------------------------------------------------------
+# Invariant: a broken, truncated, empty or missing card can NEVER be committed.
+#
+# How it is enforced, mechanically:
+#   1. The generators run with `continue-on-error: true`. A transient GitHub API blip
+#      (rate limit, 5xx, DNS) therefore does NOT turn the whole run red. It is recorded,
+#      not escalated.
+#   2. Nothing is committed by the generators themselves. The one and only commit step is
+#      gated on the `verify` step's `ok` output.
+#   3. `verify` is all-or-nothing across the FULL asset contract above. Every one of the
+#      five contracted SVGs must (a) exist, (b) be non-trivial in size, (c) parse as
+#      well-formed XML with an <svg> root. A generator that dies halfway through a write
+#      leaves unparseable XML, which fails (c).
+#   4. If ANY generator exited non-zero, OR ANY card fails verification, `verify` restores
+#      assets/ to the last known-good committed state (`git checkout` for tracked files,
+#      `git clean` for files a partial run created) and sets ok=false. The commit step is
+#      then skipped entirely, the branch keeps yesterday's good cards, and the run ends
+#      green with a ::warning annotation instead of a red X in the user's inbox.
+#   5. Because the restore happens before the commit step can run, there is no code path
+#      in which a half-written file reaches `git add`. The failure mode is always
+#      "the cards are one cycle stale", never "the profile renders a broken card".
+#
+# A genuinely broken repo (a generator script that does not exist) is NOT transient and
+# IS escalated loudly -- see the "Preflight" step. So is a push rejection that is not a
+# concurrent-update race -- see the commit step.
+#
+# ---------------------------------------------------------------------------------------
+# SHELL CONTRACT (the reason several steps look defensive)
+# ---------------------------------------------------------------------------------------
+# GitHub Actions executes every `run:` block as `bash -e {0}`. The -e is applied to the
+# interpreter, NOT written inside the script, so a later `set -uo pipefail` does not and
+# cannot clear it. Consequence: `some_command` followed by `if [ $? -ne 0 ]` is DEAD CODE
+# -- bash aborts the whole step at `some_command` and the check never executes. Every
+# command in this file that is allowed to fail is therefore either the condition of an
+# `if`, or suffixed with `|| true`. Do not reintroduce a bare `$?` check.
+# ---------------------------------------------------------------------------------------
+
+name: Profile Assets
+
+on:
+  # Twice a day, offset off the top of the hour so we are not queued behind the
+  # worldwide 00:00/12:00 cron stampede. UTC. snake.yml deliberately runs at a
+  # different hour so the two never contend.
+  schedule:
+    - cron: "23 6,18 * * *"
+
+  workflow_dispatch:
+
+  # Only when the generators themselves change. Deliberately NOT on every push to main:
+  # this workflow pushes to main, and a broad push trigger is how you build a loop.
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/**"
+      - ".github/workflows/profile-assets.yml"
+
+# Least privilege. This workflow writes commits to its own repo and does nothing else.
+permissions:
+  contents: write
+
+# One asset build at a time. Two overlapping runs would both rebase and race to push.
+# cancel-in-progress is false on purpose: killing a run mid-push is worse than waiting
+# for it. The group name is distinct from snake.yml's ("snake-animation"), so the two
+# workflows never block each other -- and they cannot collide on content either, because
+# this one writes assets/ on the default branch while snake.yml writes the `output`
+# branch, which nothing here ever touches.
+concurrency:
+  group: profile-assets
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Render and commit cards
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Forks get a clone of the workflow but no reason to run it (and no write rights).
+    if: github.repository == 'yashpatel-py/yashpatel-py'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full history so the pre-push rebase below has something to rebase onto.
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          # The generators are stdlib-only by design. If that ever changes, a
+          # requirements file is honoured without editing this workflow.
+          if [ -f scripts/requirements.txt ]; then
+            python -m pip install --upgrade pip
+            python -m pip install -r scripts/requirements.txt
+          else
+            echo "No scripts/requirements.txt - generators run on the stdlib."
+          fi
+
+      - name: Preflight - generators must exist
+        # A missing generator is a repo defect, not a transient blip. Fail loudly and
+        # early rather than silently publishing stale cards forever.
+        run: |
+          set -euo pipefail
+          missing=0
+          for f in scripts/gen_cards.py scripts/gen_hero.py; do
+            if [ ! -f "$f" ]; then
+              echo "::error file=$f::Required generator $f is missing from the repository."
+              missing=1
+            fi
+          done
+          [ "$missing" -eq 0 ]
+          mkdir -p assets
+
+      - name: Generate stats and language cards
+        id: gen_cards
+        continue-on-error: true
+        env:
+          # gen_cards.py reads the GitHub GraphQL API and NEEDS the PAT, not the
+          # default token. The built-in GITHUB_TOKEN cannot read
+          # contributionsCollection.restrictedContributionsCount (the private
+          # contribution count) and cannot see private repos under
+          # ownerAffiliations: OWNER. It does not error on either -- it silently
+          # returns 0 and an empty repo list, which is exactly the degraded response
+          # the generator's sanity-gate floors now reject. So WITHOUT PROFILE_TOKEN
+          # this step fails the gate and writes nothing, leaving the committed cards
+          # as the last known-good version. That is the intended behaviour: stale
+          # correct numbers beat fresh wrong ones.
+          #
+          # Pass each secret under its OWN name. gen_cards.py resolves
+          # PROFILE_TOKEN first and falls back to GITHUB_TOKEN, and it warns on
+          # stderr when it had to fall back -- handing the PAT over as GITHUB_TOKEN
+          # would make that warning fire on every run and hide the real state.
+          PROFILE_TOKEN: ${{ secrets.PROFILE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/gen_cards.py
+
+      - name: Generate hero banner
+        id: gen_hero
+        continue-on-error: true
+        # No env: gen_hero.py makes no network calls and reads no token. Passing
+        # GITHUB_TOKEN here was a no-op that implied an API dependency it does not have.
+        run: python scripts/gen_hero.py
+
+      - name: Verify every card, or restore the last good ones
+        id: verify
+        env:
+          CARDS_OUTCOME: ${{ steps.gen_cards.outcome }}
+          HERO_OUTCOME: ${{ steps.gen_hero.outcome }}
+        run: |
+          # -e is already in force (see SHELL CONTRACT above); stating it here is honesty,
+          # not a change in behaviour. Everything below that may legitimately fail is
+          # either an `if` condition or `|| true`-guarded.
+          set -euo pipefail
+
+          fail() {
+            echo "::warning::$1 Cards were NOT committed; the branch keeps the last known-good assets."
+            # Restore tracked assets to HEAD and delete anything a partial run created.
+            git checkout -- assets 2>/dev/null || true
+            git clean -fdq assets 2>/dev/null || true
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          }
+
+          if [ "$CARDS_OUTCOME" != "success" ] || [ "$HERO_OUTCOME" != "success" ]; then
+            fail "A generator exited non-zero (gen_cards=$CARDS_OUTCOME, gen_hero=$HERO_OUTCOME) - most likely a transient GitHub API blip."
+          fi
+
+          # The validator runs as the CONDITION of an `if`, which is the one context bash
+          # exempts from -e. This is what makes the graceful-degradation path below
+          # reachable at all: as a bare command, a non-zero exit would abort the step.
+          # REQUIRED must stay in sync with the asset contract in the header and with the
+          # image paths in README.md.
+          if ! python - <<'PY'
+          import sys, os, xml.etree.ElementTree as ET
+
+          REQUIRED = [
+              "assets/hero.svg",
+              "assets/stats-dark.svg",
+              "assets/langs-dark.svg",
+          ]
+          MIN_BYTES = 400  # a real card is multiple KB; anything this small is a stub
+
+          problems = []
+          for path in REQUIRED:
+              if not os.path.isfile(path):
+                  problems.append(f"{path}: missing")
+                  continue
+              size = os.path.getsize(path)
+              if size < MIN_BYTES:
+                  problems.append(f"{path}: only {size} bytes (truncated or empty)")
+                  continue
+              try:
+                  root = ET.parse(path).getroot()
+              except ET.ParseError as exc:
+                  problems.append(f"{path}: not well-formed XML ({exc})")
+                  continue
+              if not root.tag.endswith("svg"):
+                  problems.append(f"{path}: root element is <{root.tag}>, expected <svg>")
+              else:
+                  print(f"ok  {path}  ({size} bytes)")
+
+          if problems:
+              print("INVALID:", "; ".join(problems), file=sys.stderr)
+              sys.exit(1)
+          PY
+          then
+            fail "One or more cards failed validation (missing, truncated, or not well-formed SVG)."
+          fi
+
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push if the cards actually changed
+        if: steps.verify.outputs.ok == 'true'
+        run: |
+          set -euo pipefail
+
+          # ONE branch variable for fetch, rebase and push. workflow_dispatch can be
+          # started from any ref; the old code pushed to ${GITHUB_REF_NAME} but rebased
+          # onto a hardcoded origin/main, which would rebase a feature branch onto main.
+          BRANCH="${GITHUB_REF_NAME:-main}"
+          echo "Asset target branch: $BRANCH"
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Scope the commit to assets/ - this job has no business touching anything else.
+          git add -A assets
+
+          if git diff --cached --quiet; then
+            echo "Cards are byte-identical to what is already on $BRANCH. Nothing to commit."
+            exit 0
+          fi
+
+          # [skip ci] is load-bearing: it stops this push from re-triggering any workflow,
+          # including snake.yml (which does fire on push to main). Without it, every asset
+          # refresh would kick off a snake rebuild it has no reason to.
+          git commit -m "chore(assets): refresh profile cards [skip ci]"
+
+          push_log="${RUNNER_TEMP:-/tmp}/git-push.log"
+
+          # Someone may have pushed while we rendered. Rebase our single assets-only
+          # commit on top and retry a couple of times before giving up.
+          for attempt in 1 2 3; do
+            if git push origin "HEAD:${BRANCH}" >"$push_log" 2>&1; then
+              cat "$push_log"
+              echo "Pushed on attempt $attempt."
+              exit 0
+            fi
+            cat "$push_log"
+
+            # Classify the rejection before deciding whether it is survivable.
+            # Losing a race to a concurrent push is survivable: rebase, retry.
+            # ANYTHING else - contents:write revoked, a branch protection rule that
+            # blocks github-actions[bot], the repo renamed or moved - is PERMANENT.
+            # Swallowing those into exit 0 is how you get a wall of green runs while
+            # the profile silently serves cards that stopped updating months ago.
+            if ! grep -qEi 'fetch first|non-fast-forward|cannot lock ref|stale info' "$push_log"; then
+              echo "::error::Push to '$BRANCH' was rejected, and NOT because of a concurrent-update race. This will not fix itself on the next run. Check, in order: the workflow still has contents:write; branch protection on '$BRANCH' still permits github-actions[bot]; the repository has not been renamed, moved or archived."
+              exit 1
+            fi
+
+            echo "Push lost a race (attempt $attempt) - rebasing onto origin/$BRANCH and retrying."
+
+            # Unguarded, a fetch failure would abort the step under -e and paint the run
+            # red, never reaching the warning-and-exit-0 path this loop was written for.
+            if ! git fetch origin "$BRANCH"; then
+              echo "::warning::Could not fetch origin/$BRANCH (network or API blip). Skipping this cycle; the next run regenerates and retries."
+              exit 0
+            fi
+
+            if ! git rebase "origin/${BRANCH}"; then
+              git rebase --abort || true
+              echo "::warning::Could not rebase the asset refresh onto origin/$BRANCH. Skipping this cycle; the next run regenerates the cards from scratch and retries."
+              exit 0
+            fi
+
+            sleep 5
+          done
+
+          echo "::error::Push to '$BRANCH' was still rejected after 3 rebase-and-retry attempts. Three lost races in a row is not normal traffic - the cards are now frozen, so this is surfaced as a failure rather than another silent stale cycle."
+          exit 1
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Profile assets"
+            echo ""
+            echo "| step | result |"
+            echo "| --- | --- |"
+            echo "| gen_cards.py | \`${{ steps.gen_cards.outcome }}\` |"
+            echo "| gen_hero.py | \`${{ steps.gen_hero.outcome }}\` |"
+            echo "| cards verified | \`${{ steps.verify.outputs.ok || 'false' }}\` |"
+            echo ""
+            if [ "${{ steps.verify.outputs.ok }}" = "true" ]; then
+              echo "Cards rendered and verified. Committed only if they differed from the branch."
+            else
+              echo "Cards were not committed. The branch still serves the last known-good assets."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
